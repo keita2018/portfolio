@@ -1,0 +1,14 @@
+services:
+  frontend:
+    container_name: self-intro
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5175:5173"
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - node_modules:/usr/src/frontend/node_modules # node_modules
+    tty: true
+volumes:
+  node_modules:
