@@ -1,7 +1,9 @@
 import { useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
+// import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { ShaderMaterial, TextureLoader, AdditiveBlending } from 'three'
+import { ShaderMaterial } from 'three'
+// import { TextureLoader, AdditiveBlending } from 'three'
 
 const vertexShader = `
   varying vec2 vUv;
@@ -51,7 +53,7 @@ export default function Sun() {
   const coronaRef = useRef<THREE.Mesh>(null!)
   const flareRef = useRef<THREE.Mesh>(null!)
   const materialRef = useRef<ShaderMaterial>(null!)
-  const { viewport } = useThree()
+  // const { viewport } = useThree()
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime()
@@ -67,7 +69,7 @@ export default function Sun() {
     }
   })
 
-  const flareTexture = new TextureLoader().load('/textures/flare.png') // ご自身でflare.pngを用意
+  // const flareTexture = new TextureLoader().load('/textures/flare.png') // ご自身でflare.pngを用意
 
   return (
     <>

@@ -1,13 +1,15 @@
 // PortfolioCanvas.tsx
 import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import PlanetSystem from '../components/PlanetSystem'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { PerspectiveCamera, Stars, Environment } from '@react-three/drei';
+import { useSectionStore } from '../stores/useSectionStore'
 
 
 export default function PortfolioCanvas() {
+const setSection = useSectionStore((s) => s.setSection)
+
   return (
     <Canvas 
       shadows
@@ -16,6 +18,7 @@ export default function PortfolioCanvas() {
         gl.shadowMap.enabled = true
         gl.shadowMap.type = THREE.PCFSoftShadowMap
       }}
+      onPointerMissed={() => setSection(null)}
     >
       {/* === ライト === */}
       {/* 全体をほんのり照らす（真っ暗防止用） */}
