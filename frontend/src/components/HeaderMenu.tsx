@@ -12,7 +12,7 @@ export default function HeaderMenu() {
         left: 20,
         color: 'white',
         lineHeight: '1.8',
-        fontSize: '18px',
+        fontSize: '24px',
         zIndex: 10,
       }}
     >
