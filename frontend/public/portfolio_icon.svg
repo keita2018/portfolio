@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Earth shading -->
+    <radialGradient id="earthShade" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#5ec8ff"/>
+      <stop offset="70%" stop-color="#2a9df4"/>
+      <stop offset="100%" stop-color="#1876d1"/>
+    </radialGradient>
+
+    <!-- Rocket flame -->
+    <linearGradient id="flame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff176"/>
+      <stop offset="60%" stop-color="#ff8a00"/>
+      <stop offset="100%" stop-color="#ff3d00"/>
+    </linearGradient>
+
+    <!-- Subtle highlight on Earth -->
+    <radialGradient id="earthHighlight" cx="30%" cy="25%" r="35%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Earth -->
+  <g transform="translate(256,330)">
+    <circle r="160" fill="url(#earthShade)"/>
+    <!-- Continents (simple stylized shapes) -->
+    <path d="M-70,-40c40,-20,95,-10,115,20c15,25,-10,40,-35,45c-30,7,-55,25,-65,35c-20,20,-55,15,-70,-5c-10,-13,-8,-32,8,-40c16,-8,22,-18,28,-32c5,-12,12,-18,19,-23z"
+          fill="#4cd964"/>
+    <path d="M40,10c20,-10,40,-5,55,8c15,12,20,30,5,43c-18,16,-52,18,-76,4c-14,-8,-6,-28,16,-41z"
+          fill="#4cd964"/>
+    <!-- Ocean highlight -->
+    <ellipse rx="95" ry="70" cx="-45" cy="-70" fill="url(#earthHighlight)"/>
+  </g>
+
+  <!-- Rocket (above Earth, slight tilt) -->
+  <g transform="translate(328,160) rotate(-22)">
+    <!-- Flame -->
+    <path d="M-6,80 C-16,102 -12,118 0,128 C12,118 16,102 6,80 Z" fill="url(#flame)"/>
+    <!-- Exhaust glow -->
+    <ellipse cx="0" cy="92" rx="10" ry="6" fill="#ffd180" opacity="0.5"/>
+
+    <!-- Body -->
+    <rect x="-16" y="0" width="32" height="90" rx="16" ry="16" fill="#ffffff" stroke="#dfe6ee" stroke-width="2"/>
+    <!-- Nose cone -->
+    <path d="M0,-26 L16,0 L-16,0 Z" fill="#e3e9f1" stroke="#dfe6ee" stroke-width="2"/>
+    <!-- Window -->
+    <circle cx="0" cy="28" r="10" fill="#6ec8ff" stroke="#3aa0ff" stroke-width="2"/>
+    <!-- Fins -->
+    <path d="M-16,58 L-40,78 L-16,72 Z" fill="#ff5252"/>
+    <path d="M16,58 L40,78 L16,72 Z" fill="#ff5252"/>
+    <!-- Mid stripe -->
+    <rect x="-18" y="48" width="36" height="6" fill="#e53935" rx="3"/>
+  </g>
+</svg>

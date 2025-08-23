@@ -1,7 +1,7 @@
 // src/stores/useSectionStore.ts
 import { create } from 'zustand'
 
-type Section = 'none' | 'profile' | 'tech' | 'experience'
+type Section = 'none' | 'profile' | 'tech' | 'experience' | null
 
 interface SectionStore {
   section: Section
