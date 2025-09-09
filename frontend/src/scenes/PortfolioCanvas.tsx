@@ -3,12 +3,26 @@ import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
 import PlanetSystem from '../components/PlanetSystem'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { PerspectiveCamera, Stars, Environment } from '@react-three/drei';
-import { useSectionStore } from '../stores/useSectionStore'
+import { PerspectiveCamera, Stars, Environment, OrbitControls, Html } from '@react-three/drei';
+// import { useSectionStore } from '../stores/useSectionStore'
+
+// import Profile from '../views/Profile'
+// import TechStack from '../views/TechStack'
+// import Experience from '../views/Experience'
 
 
 export default function PortfolioCanvas() {
-const setSection = useSectionStore((s) => s.setSection)
+  // const section = useSectionStore((s) => s.section)
+  // const setSection = useSectionStore((s) => s.setSection)
+  // const { close } = useSectionStore()
+  // console.log('SECTION', section)
+  // console.log('STORE_ID', useSectionStore.getState) 
+
+  // const cardContent =
+  //   section === 'profile'    ? <Profile /> :
+  //   section === 'tech'       ? <TechStack /> :
+  //   section === 'experience' ? <Experience /> :
+  //   null
 
   return (
     <Canvas 
@@ -18,7 +32,7 @@ const setSection = useSectionStore((s) => s.setSection)
         gl.shadowMap.enabled = true
         gl.shadowMap.type = THREE.PCFSoftShadowMap
       }}
-      onPointerMissed={() => setSection(null)}
+      // onPointerMissed={() => setSection(null)}
     >
       {/* === ライト === */}
       {/* 全体をほんのり照らす（真っ暗防止用） */}
@@ -52,7 +66,7 @@ const setSection = useSectionStore((s) => s.setSection)
       {/* カメラ */}
       <PerspectiveCamera
         makeDefault
-        position={[-4.5, -3, 8]} // ← 高さ5、奥行き10の位置に配置（Z遠め）
+        position={[-15.5, -11, 50]} // ← 高さ5、奥行き10の位置に配置（Z遠め）
         rotation={[0.5, 0, 0]} // ← 軽く下向きに回転（Y回転なし）
         fov={50}
       />
@@ -82,6 +96,48 @@ const setSection = useSectionStore((s) => s.setSection)
           luminanceSmoothing={0.9} // なだらかにする
         />
       </EffectComposer>
+
+      {/* <Html fullscreen transform={false}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'grid',
+            placeItems: 'center',
+            pointerEvents: 'none',    // 全体はクリックを通す
+          }}
+        >
+          <div
+            style={{
+              // カード本体
+              minWidth: 420,
+              maxWidth: 'min(85vw, 960px)',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              background: 'rgba(12,12,12,0.9)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 16,
+              padding: 24,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(6px)',
+              // フェード演出
+              opacity: cardContent ? 1 : 0,
+              transform: cardContent ? 'scale(1)' : 'scale(0.98)',
+              transition: 'opacity 220ms ease, transform 220ms ease',
+              // カード内の操作を有効化
+              pointerEvents: cardContent ? 'auto' : 'none',
+            }}
+          >
+            {cardContent}
+          </div>
+        </div>
+      </Html> */}
+
+      <OrbitControls
+       enableDamping
+       enableZoom={false}
+       // enableRotate={!section}
+      />
     </Canvas>
   )
 }
