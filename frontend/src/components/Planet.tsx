@@ -24,6 +24,8 @@ interface PlanetProps {
   cardRotation?: [number, number, number]
   appearSpin?: number                        // 入場中の回転量（ラジアン）
   appearOvershoot?: number                   // 少し“ポップ”させる倍率
+  orbitEuler?: [number, number, number]   // 軌道面の回転（XYZオイラー）
+  phaseOffset?: number                    // 初期位相（任意）
 
   // 既存
   color: string
@@ -47,6 +49,8 @@ export default function Planet({
   cardRotation = [-0.1, 0.2, 0],
   appearSpin = Math.PI * 1.2,      // 入場時に 1.2π ラジアン回す
   appearOvershoot = 0.08,          // 8% だけ“ポッ”と膨らむ
+  orbitEuler,
+  phaseOffset = 0,
 
   color,
   orbitRadius,
@@ -58,9 +62,15 @@ export default function Planet({
 }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null!)
   const cardRef = useRef<THREE.Mesh>(null!)
-  const angle = useRef(Math.random() * Math.PI * 2)
+  const angle = useRef((phaseOffset ?? 0) + Math.random() * Math.PI * 2)
   const timeRef = useRef(0)
   const tRef = useRef(0) // 0..1 : 球→カードのクロスフェード係数
+
+  // 軌道面の回転（オイラー→クォータニオン）
+  const orbitQuat = useMemo(() => {
+    const e = orbitEuler ?? [0, 0, 0]
+    return new THREE.Quaternion().setFromEuler(new THREE.Euler(e[0], e[1], e[2]))
+  }, [orbitEuler])
 
   // ===== 既存：アニメーション（公転・自転・uTime更新） =====
   useFrame((_, delta) => {
@@ -76,9 +86,17 @@ export default function Planet({
     // 公転 or 中央へ移動
     if (!isFocused) {
       angle.current += orbitSpeed
-      const x = Math.cos(angle.current) * orbitRadius
-      const y = Math.sin(angle.current) * orbitRadius
-      meshRef.current.position.set(x, y, 0)
+      // XY平面の円（基本軌道）
+      const base = new THREE.Vector3(
+        Math.cos(angle.current) * orbitRadius,
+        Math.sin(angle.current) * orbitRadius,
+        0
+      )
+
+      // ★ 軌道面の回転を適用
+      base.applyQuaternion(orbitQuat)
+
+      meshRef.current.position.copy(base)
     } else {
       // 中央(0,0,0)へスムーズ移動
       meshRef.current.position.lerp(new THREE.Vector3(-5, 3, 0), 1 - Math.pow(0.001, delta * speed))
@@ -369,11 +387,11 @@ export default function Planet({
           // 球→カードのフェード（tRefで更新）
           // opacity は useFrame 内で cardMat.opacity = tRef.current によって更新されています
         />
-        {showCard && (
+        {/* {showCard && (
           <Html transform center distanceFactor={2.2} style={{ pointerEvents: 'auto' }}>
             {cardContent}
           </Html>
-        )}
+        )} */}
       </RoundedBox>
 
       {/* lowpoly の輪郭線（既存） */}
