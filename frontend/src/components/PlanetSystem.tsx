@@ -1,10 +1,6 @@
 // src/components/PlanetSystem.tsx
 import Planet from './Planet'
-import Sun from './Sun'
 import { useSectionStore } from '../stores/useSectionStore'
-import Profile from '../views/Profile'
-import TechStack from '../views/TechStack'
-import Experience from '../views/Experience'
 import VoxelColumnSphereDual from "./VoxelSun";
 
 export default function PlanetSystem() {
@@ -76,8 +72,8 @@ export default function PlanetSystem() {
         // ring
         onClick={() => setSection('profile')}
         isFocused={section === 'profile'}
-        showCard={section === 'profile'}
-        cardContent={<Profile />}
+        // showCard={section === 'profile'}
+        // cardContent={<Profile />}
         cardRotation={[ 0.57, 0, 0 ]}
         appearSpin={Math.PI * 0.8}
         appearOvershoot={0.06}
@@ -92,8 +88,8 @@ export default function PlanetSystem() {
         // ring
         onClick={() => setSection('tech')}
         isFocused={section === 'tech'}
-        showCard={section === 'tech'}
-        cardContent={<TechStack />}
+        // showCard={section === 'tech'}
+        // cardContent={<TechStack />}
         cardRotation={[ 0.57, 0, 0 ]}
         appearSpin={Math.PI * 1.4}
         appearOvershoot={0.1}
@@ -108,8 +104,8 @@ export default function PlanetSystem() {
         variant="holo"  // "metal" 'lowpoly' や 'toon' も試せます
         onClick={() => setSection('experience')}
         isFocused={section === 'experience'}
-        showCard={section === 'experience'}
-        cardContent={<Experience />}
+        // showCard={section === 'experience'}
+        // cardContent={<Experience />}
         cardRotation={[ 0.57, 0, 0 ]}
         appearSpin={Math.PI * 1.0}
         appearOvershoot={0.08}

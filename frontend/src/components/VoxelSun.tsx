@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { useMemo, useRef, useLayoutEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { ThreeEvent } from "@react-three/fiber";
+// import type { ThreeEvent } from "@react-three/fiber";
 
 type LayerOpts = {
   radius: number;            // その層の“基準球半径”（内側端の目安）
@@ -176,22 +176,22 @@ export default function VoxelColumnSphereDual({
   const CORONA_WOBBLE_SPEED = 0.9;    // 0.6〜1.2
   const CORONA_WOBBLE_FREQ  = 0.15;   // 0.1〜0.25
 
-  const applyRadialOffset = (mesh: THREE.InstancedMesh | null, offset: number) => {
-    if (!mesh || offset === undefined) return;
-    const data = instanceDataMap.current.get(mesh);
-    if (!data) return;
+  // const applyRadialOffset = (mesh: THREE.InstancedMesh | null, offset: number) => {
+  //   if (!mesh || offset === undefined) return;
+  //   const data = instanceDataMap.current.get(mesh);
+  //   if (!data) return;
 
-    const dummy = new THREE.Object3D();
-    for (let i = 0; i < data.pos.length; i++) {
-      // 基準位置 + 法線方向 * offset
-      dummy.position.copy(data.pos[i]).addScaledVector(data.normal[i], offset);
-      dummy.quaternion.copy(data.quat[i]);
-      dummy.scale.copy(data.scale[i]);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  };
+  //   const dummy = new THREE.Object3D();
+  //   for (let i = 0; i < data.pos.length; i++) {
+  //     // 基準位置 + 法線方向 * offset
+  //     dummy.position.copy(data.pos[i]).addScaledVector(data.normal[i], offset);
+  //     dummy.quaternion.copy(data.quat[i]);
+  //     dummy.scale.copy(data.scale[i]);
+  //     dummy.updateMatrix();
+  //     mesh.setMatrixAt(i, dummy.matrix);
+  //   }
+  //   mesh.instanceMatrix.needsUpdate = true;
+  // };
 
   // 緯度経度正規化テーブル（0..1）
   const grid = useMemo(() => {
@@ -679,15 +679,15 @@ export default function VoxelColumnSphereDual({
   });
 
   // プロミネンスのパラメータ（安定のため初回だけ生成）
-  const prominences = useMemo(() => {
-    return Array.from({ length: 6 }).map(() => ({
-      baseR: shell.radius,
-      height: 1.6 + Math.random() * 1.2,
-      theta: Math.random() * Math.PI,
-      phi:   Math.random() * Math.PI * 2,
-      radius: 0.08 + Math.random() * 0.05, // チューブ太さ
-    }));
-  }, [shell.radius]);
+  // const prominences = useMemo(() => {
+  //   return Array.from({ length: 6 }).map(() => ({
+  //     baseR: shell.radius,
+  //     height: 1.6 + Math.random() * 1.2,
+  //     theta: Math.random() * Math.PI,
+  //     phi:   Math.random() * Math.PI * 2,
+  //     radius: 0.08 + Math.random() * 0.05, // チューブ太さ
+  //   }));
+  // }, [shell.radius]);
 
   return (
     <group ref={groupRef}>
@@ -797,42 +797,42 @@ export default function VoxelColumnSphereDual({
 }
 
 /** ② プロミネンス用の内部コンポーネント（追加） */
-function Prominence({
-  baseR, height, theta, phi, radius = 0.1
-}: { baseR: number; height: number; theta: number; phi: number; radius?: number }) {
-  // 表面の開始位置（法線方向へ少し外）
-  const start = useMemo(() => new THREE.Vector3(
-    Math.sin(theta) * Math.cos(phi),
-    Math.cos(theta),
-    Math.sin(theta) * Math.sin(phi)
-  ).multiplyScalar(baseR * 1.02), [baseR, theta, phi]);
+// function Prominence({
+//   baseR, height, theta, phi, radius = 0.1
+// }: { baseR: number; height: number; theta: number; phi: number; radius?: number }) {
+//   // 表面の開始位置（法線方向へ少し外）
+//   const start = useMemo(() => new THREE.Vector3(
+//     Math.sin(theta) * Math.cos(phi),
+//     Math.cos(theta),
+//     Math.sin(theta) * Math.sin(phi)
+//   ).multiplyScalar(baseR * 1.02), [baseR, theta, phi]);
 
-  // 接線方向に少し流しつつ外へ
-  const mid = useMemo(() => {
-    const normal = start.clone().normalize();
-    const tangent = new THREE.Vector3(-Math.sin(phi), 0, Math.cos(phi)).multiplyScalar(baseR * 0.6);
-    return start.clone().addScaledVector(normal, height).add(tangent);
-  }, [start, phi, baseR, height]);
+//   // 接線方向に少し流しつつ外へ
+//   const mid = useMemo(() => {
+//     const normal = start.clone().normalize();
+//     const tangent = new THREE.Vector3(-Math.sin(phi), 0, Math.cos(phi)).multiplyScalar(baseR * 0.6);
+//     return start.clone().addScaledVector(normal, height).add(tangent);
+//   }, [start, phi, baseR, height]);
 
-  const end = useMemo(() => start.clone().addScaledVector(start.clone().normalize(), baseR * 0.15), [start, baseR]);
+//   const end = useMemo(() => start.clone().addScaledVector(start.clone().normalize(), baseR * 0.15), [start, baseR]);
 
-  const path = useMemo(() => {
-    const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-    return new THREE.CatmullRomCurve3(curve.getPoints(32));
-  }, [start, mid, end]);
+//   const path = useMemo(() => {
+//     const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+//     return new THREE.CatmullRomCurve3(curve.getPoints(32));
+//   }, [start, mid, end]);
 
-  return (
-    <mesh renderOrder={1000}>
-      <tubeGeometry args={[path, 64, radius, 12, false]} />
-      <meshStandardMaterial
-        color={"#ff8800"}
-        emissive={"#ff4d00"}
-        emissiveIntensity={1.4}
-        transparent
-        opacity={0.9}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-}
+//   return (
+//     <mesh renderOrder={1000}>
+//       <tubeGeometry args={[path, 64, radius, 12, false]} />
+//       <meshStandardMaterial
+//         color={"#ff8800"}
+//         emissive={"#ff4d00"}
+//         emissiveIntensity={1.4}
+//         transparent
+//         opacity={0.9}
+//         blending={THREE.AdditiveBlending}
+//         depthWrite={false}
+//       />
+//     </mesh>
+//   );
+// }
