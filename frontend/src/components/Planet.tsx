@@ -3,7 +3,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { MeshDistortMaterial, Edges, Html, RoundedBox } from '@react-three/drei'
+import { MeshDistortMaterial, Edges, RoundedBox } from '@react-three/drei'
 
 type Variant =
   | 'wobble'     // 有機的ゆらぎ
@@ -19,8 +19,8 @@ type Variant =
 interface PlanetProps {
   
   isFocused?: boolean
-  showCard?: boolean
-  cardContent?: React.ReactNode
+  // showCard?: boolean
+  // cardContent?: React.ReactNode
   cardRotation?: [number, number, number]
   appearSpin?: number                        // 入場中の回転量（ラジアン）
   appearOvershoot?: number                   // 少し“ポップ”させる倍率
@@ -44,8 +44,8 @@ const easeOutBack = (t: number, k = 1.70158) => {
 
 export default function Planet({
   isFocused = false,
-  showCard = false,
-  cardContent,
+  // showCard = false,
+  // cardContent,
   cardRotation = [-0.1, 0.2, 0],
   appearSpin = Math.PI * 1.2,      // 入場時に 1.2π ラジアン回す
   appearOvershoot = 0.08,          // 8% だけ“ポッ”と膨らむ
