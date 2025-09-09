@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
 import PlanetSystem from '../components/PlanetSystem'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { PerspectiveCamera, Stars, Environment, OrbitControls, Html } from '@react-three/drei';
+import { PerspectiveCamera, Stars, Environment, OrbitControls } from '@react-three/drei';
 // import { useSectionStore } from '../stores/useSectionStore'
 
 // import Profile from '../views/Profile'
