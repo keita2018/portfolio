@@ -6,6 +6,7 @@ const Profile: React.FC = () => {
   const sec: React.CSSProperties = { margin: 'clamp(8px, 1.4vw, 12px) 0' }
   const h4: React.CSSProperties = { margin: '6px 0', fontSize: 'clamp(13px,1.6vw,15px)', opacity: 0.9 }
   const ul: React.CSSProperties = { margin: 0, paddingLeft: 18 }
+  const titleName: React.CSSProperties = { color: '#5fe4a2ff', fontWeight: 700 };
 
   return (
     <CardShell title="プロフィール" widthMin={280} widthMax={520}>
@@ -14,7 +15,7 @@ const Profile: React.FC = () => {
       </div>
 
       <section style={sec}>
-        <h4 style={h4}>基本情報</h4>
+        <h4 style={h4}><span style={titleName}>基本情報</span></h4>
         <ul style={ul}>
           <li>所属：佐賀大学 大学院 理工学研究科 知能情報工学コース（M1）</li>
           <li>専攻：知能情報工学 / 数学</li>
@@ -25,7 +26,7 @@ const Profile: React.FC = () => {
         </ul>
       </section>
       <section style={sec}>
-        <h4 style={h4}>経歴</h4>
+        <h4 style={h4}><span style={titleName}>経歴</span></h4>
         <ul style={ul}>
           <li>2018年 4月 福岡県立明善高等学校 理数科 入学</li>
           <li>2021年 3月 福岡県立明善高等学校 理数科 卒業</li>
