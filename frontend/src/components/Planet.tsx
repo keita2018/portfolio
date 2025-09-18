@@ -1,33 +1,28 @@
-
-// src/components/Planet.tsx
+// src/components/Planet.tsx 
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MeshDistortMaterial, Edges, RoundedBox } from '@react-three/drei'
 
 type Variant =
-  | 'wobble'     // 有機的ゆらぎ
-  | 'grid'       // 近未来グリッド
-  | 'metal'      // 金属
-  | 'wire'       // ワイヤーフレーム
-  | 'toon'       // トゥーン
-  | 'lowpoly'    // ローポリ形状
-  | 'basic'      // 通常
-  | 'holo'       // ホログラム
-  | 'morph'      // 形状変化
+  | 'wobble'
+  | 'grid'
+  | 'metal'
+  | 'wire'
+  | 'toon'
+  | 'lowpoly'
+  | 'basic'
+  | 'holo'
+  | 'morph'
 
 interface PlanetProps {
-  
   isFocused?: boolean
-  // showCard?: boolean
-  // cardContent?: React.ReactNode
   cardRotation?: [number, number, number]
-  appearSpin?: number                        // 入場中の回転量（ラジアン）
-  appearOvershoot?: number                   // 少し“ポップ”させる倍率
-  orbitEuler?: [number, number, number]   // 軌道面の回転（XYZオイラー）
-  phaseOffset?: number                    // 初期位相（任意）
+  appearSpin?: number
+  appearOvershoot?: number
+  orbitEuler?: [number, number, number]
+  phaseOffset?: number
 
-  // 既存
   color: string
   orbitRadius: number
   orbitSpeed: number
@@ -44,11 +39,9 @@ const easeOutBack = (t: number, k = 1.70158) => {
 
 export default function Planet({
   isFocused = false,
-  // showCard = false,
-  // cardContent,
   cardRotation = [-0.1, 0.2, 0],
-  appearSpin = Math.PI * 1.2,      // 入場時に 1.2π ラジアン回す
-  appearOvershoot = 0.08,          // 8% だけ“ポッ”と膨らむ
+  appearSpin = Math.PI * 1.2,
+  appearOvershoot = 0.08,
   orbitEuler,
   phaseOffset = 0,
 
@@ -62,93 +55,32 @@ export default function Planet({
 }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null!)
   const cardRef = useRef<THREE.Mesh>(null!)
+
+  // 状態（再レンダーしない）
   const angle = useRef((phaseOffset ?? 0) + Math.random() * Math.PI * 2)
   const timeRef = useRef(0)
-  const tRef = useRef(0) // 0..1 : 球→カードのクロスフェード係数
+  const tRef = useRef(0) // 0..1 : 球→カードのクロスフェード
+
+  // ====== 使い回す一時オブジェクト（毎フレームnewしない） ======
+  const baseVec = useMemo(() => new THREE.Vector3(), [])
+  const centerTarget = useMemo(() => new THREE.Vector3(-5, 3, 0), [])
+  const qTarget = useMemo(() => {
+    const e = new THREE.Euler(cardRotation[0], cardRotation[1], cardRotation[2])
+    return new THREE.Quaternion().setFromEuler(e)
+  // 依存に配列をそのまま入れると毎回再生成されやすいので要素で追従
+  }, [cardRotation[0], cardRotation[1], cardRotation[2]])
+  const tmpQuat = useMemo(() => new THREE.Quaternion(), [])
+  const spinQuat = useMemo(() => new THREE.Quaternion(), [])
+  const finalQuat = useMemo(() => new THREE.Quaternion(), [])
+  const spinEulerY = useMemo(() => new THREE.Euler(0, 0, 0), [])
 
   // 軌道面の回転（オイラー→クォータニオン）
   const orbitQuat = useMemo(() => {
     const e = orbitEuler ?? [0, 0, 0]
     return new THREE.Quaternion().setFromEuler(new THREE.Euler(e[0], e[1], e[2]))
-  }, [orbitEuler])
+  }, [orbitEuler?.[0], orbitEuler?.[1], orbitEuler?.[2]])
 
-  // ===== 既存：アニメーション（公転・自転・uTime更新） =====
-  useFrame((_, delta) => {
-    const speed = 2.0
-    // フォーカス補間（球→カード）
-    const targetT = isFocused ? 1 : 0
-    tRef.current = THREE.MathUtils.clamp(
-      THREE.MathUtils.lerp(tRef.current, targetT, 1 - Math.pow(0.001, delta * speed)),
-      0,
-      1
-    )
-
-    // 公転 or 中央へ移動
-    if (!isFocused) {
-      angle.current += orbitSpeed
-      // XY平面の円（基本軌道）
-      const base = new THREE.Vector3(
-        Math.cos(angle.current) * orbitRadius,
-        Math.sin(angle.current) * orbitRadius,
-        0
-      )
-
-      // ★ 軌道面の回転を適用
-      base.applyQuaternion(orbitQuat)
-
-      meshRef.current.position.copy(base)
-    } else {
-      // 中央(0,0,0)へスムーズ移動
-      meshRef.current.position.lerp(new THREE.Vector3(-5, 3, 0), 1 - Math.pow(0.001, delta * speed))
-    }
-
-    // 自転
-    meshRef.current.rotation.y += delta * 0.2
-
-    // grid/holo/morph などの uTime を更新（必要時のみ）
-    timeRef.current += delta
-    const mat = meshRef.current.material as any
-    if (mat?.uniforms?.uTime) mat.uniforms.uTime.value = timeRef.current
-
-    // カードの位置とスケール（球の位置に追従 & 長方形へ）
-    if (cardRef.current) {
-      const base = size * 1.2
-      const w = THREE.MathUtils.lerp(base, size * 3.2, tRef.current)
-      const h = THREE.MathUtils.lerp(base, size * 2.0, tRef.current)
-      const d = THREE.MathUtils.lerp(base, 0.12, tRef.current)
-      cardRef.current.scale.set(w / base, h / base, d / base)
-      cardRef.current.position.copy(meshRef.current.position)
-
-      const qTarget = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(cardRotation[0], cardRotation[1], cardRotation[2])
-      )
-      const qCurrent = cardRef.current.quaternion
-      // フォーカスしているほど目標姿勢に寄せる（tRef.current: 0..1）
-      const tmp = new THREE.Quaternion().slerpQuaternions(
-        qCurrent,
-        qTarget,
-        (1 - Math.pow(0.001, delta * speed)) * tRef.current
-      )
-      cardRef.current.quaternion.copy(tmp)
-
-      // ★ 入場アニメ：回転＆ポップ
-      const e = easeOutBack(tRef.current)           // 0→1（終盤で少しオーバー）
-      const spin = appearSpin * (1 - e)             // 最初に回って、終盤で止まる
-      // const [rx, ry, rz] = cardRotation
-      // const qTarget = new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz))
-      const qSpin   = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, spin, 0))
-      const qFinal  = qSpin.multiply(qTarget)       // 最終姿勢に“減衰する回転”を足す
-
-      // ふわっと追従（slerp）
-      cardRef.current.quaternion.slerp(qFinal, 1 - Math.pow(0.001, delta * speed))
-
-      // ★ ちょいポップ（全体スケールを微加算）
-      const pop = 1 + appearOvershoot * Math.sin(e * Math.PI) // 0→1→0 の山
-      cardRef.current.scale.multiplyScalar(pop)
-    }
-  })
-
-  // ===== toon 用グラデ（既存） =====
+  // ===== toon 用グラデ =====
   const toonGradient = useMemo(() => {
     const canvas = document.createElement('canvas')
     canvas.width = 256
@@ -165,7 +97,7 @@ export default function Planet({
     return tex
   }, [color])
 
-  // ===== grid 用シェーダ（既存） =====
+  // ===== grid 用シェーダ =====
   const gridVertex = /* glsl */ `
     varying vec2 vUv;
     void main() {
@@ -196,7 +128,7 @@ export default function Planet({
     [color]
   )
 
-  // ===== holo 用（既存） =====
+  // ===== holo 用 =====
   const holoVertex = /* glsl */ `
     varying vec3 vNormalW;
     varying vec3 vPosW;
@@ -247,14 +179,13 @@ export default function Planet({
     []
   )
 
-  // ===== morph 用（既存） =====
+  // ===== morph 用 =====
   const morphVertex = /* glsl */ `
     varying vec3 vNormalW;
     varying vec3 vPosW;
     uniform float uTime;
-    uniform float uAmp;   // 変形量
-    uniform float uFreq;  // ノイズ周波数
-
+    uniform float uAmp;
+    uniform float uFreq;
     float hash(vec3 p){ return fract(sin(dot(p, vec3(127.1,311.7, 74.7))) * 43758.5453123); }
     float noise(vec3 p){
       vec3 i=floor(p), f=fract(p);
@@ -266,17 +197,14 @@ export default function Planet({
                 mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),u.x),u.y),u.z);
       return n;
     }
-
     void main(){
       vec3 nrm = normalize(normal);
       float n = noise(normal * uFreq + uTime*0.8);
-      float disp = (n - 0.5) * 2.0 * uAmp; // -uAmp..uAmp
-
+      float disp = (n - 0.5) * 2.0 * uAmp;
       vec3 newPos = position + nrm * disp;
       vec4 worldPos = modelMatrix * vec4(newPos,1.0);
       vPosW = worldPos.xyz;
       vNormalW = normalize(mat3(modelMatrix) * nrm);
-
       gl_Position = projectionMatrix * viewMatrix * worldPos;
     }
   `
@@ -285,7 +213,6 @@ export default function Planet({
     varying vec3 vNormalW;
     varying vec3 vPosW;
     uniform vec3 uBaseColor;
-
     void main(){
       vec3 V = normalize(cameraPosition - vPosW);
       float rim = pow(1.0 - max(dot(normalize(vNormalW), V), 0.0), 2.0);
@@ -303,13 +230,13 @@ export default function Planet({
     [color, size]
   )
 
-  // ===== 形状（既存） =====
+  // ===== 形状 =====
   const geometry = useMemo(() => {
     if (variant === 'lowpoly') return new THREE.IcosahedronGeometry(size, 1)
     return new THREE.SphereGeometry(size, 32, 32)
   }, [variant, size])
 
-  // ▼ 球とカード用のマテリアル（球↔カードのフェード用）
+  // マテリアル（球/カード）
   const sphereMat = useMemo(() => {
     const m = new THREE.MeshStandardMaterial({
       color,
@@ -332,6 +259,82 @@ export default function Planet({
     return m
   }, [])
 
+  // リング（必要な時だけ生成）
+  const ringGeom = useMemo(() => new THREE.RingGeometry(size * 1.2, size * 1.9, 64), [size])
+  const ringMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color,
+    opacity: 0.6,
+    transparent: true,
+    side: THREE.DoubleSide,
+    roughness: 0.8
+  }), [color])
+
+  // ===== アニメーション（公転・自転・uTime更新・カード入場） =====
+  useFrame((_, delta) => {
+    const speed = 2.0
+    const lerpK = 1 - Math.pow(0.001, delta * speed)
+
+    // フォーカス補間（球→カード）
+    const targetT = isFocused ? 1 : 0
+    tRef.current = THREE.MathUtils.clamp(
+      THREE.MathUtils.lerp(tRef.current, targetT, lerpK),
+      0, 1
+    )
+
+    // 公転 or 中央へ移動（Vector3を再利用）
+    if (!isFocused) {
+      angle.current += orbitSpeed
+      baseVec.set(
+        Math.cos(angle.current) * orbitRadius,
+        Math.sin(angle.current) * orbitRadius,
+        0
+      )
+      baseVec.applyQuaternion(orbitQuat)
+      meshRef.current.position.copy(baseVec)
+    } else {
+      meshRef.current.position.lerp(centerTarget, lerpK)
+    }
+
+    // 自転
+    meshRef.current.rotation.y += delta * 0.2
+
+    // uTime の更新：使用中の uniforms だけ直接更新（material参照しない）
+    timeRef.current += delta
+    if (variant === 'grid')  gridUniforms.uTime.value  = timeRef.current
+    if (variant === 'holo')  holoUniforms.uTime.value  = timeRef.current
+    if (variant === 'morph') morphUniforms.uTime.value = timeRef.current
+
+    // 球↔カードのフェード（コメントと実装を一致）
+    sphereMat.opacity = 1 - tRef.current
+    cardMat.opacity   = tRef.current
+
+    // カードの位置・姿勢・スケール（Quaternion/Eulerを再利用）
+    if (cardRef.current) {
+      const base = size * 1.2
+      const w = THREE.MathUtils.lerp(base, size * 3.2, tRef.current)
+      const h = THREE.MathUtils.lerp(base, size * 2.0, tRef.current)
+      const d = THREE.MathUtils.lerp(base, 0.12, tRef.current)
+      cardRef.current.scale.set(w / base, h / base, d / base)
+      cardRef.current.position.copy(meshRef.current.position)
+
+      // 目標：カード姿勢（固定qTargetへ漸近）
+      tmpQuat.copy(cardRef.current.quaternion)
+      tmpQuat.slerp(qTarget, lerpK * tRef.current)
+      cardRef.current.quaternion.copy(tmpQuat)
+
+      // 入場アニメ：回転＆ポップ（計算オブジェクトを再利用）
+      const e = easeOutBack(tRef.current)
+      const spin = appearSpin * (1 - e)
+      spinEulerY.y = spin
+      spinQuat.setFromEuler(spinEulerY)
+      finalQuat.copy(spinQuat).multiply(qTarget)
+      cardRef.current.quaternion.slerp(finalQuat, lerpK)
+
+      const pop = 1 + appearOvershoot * Math.sin(e * Math.PI)
+      cardRef.current.scale.multiplyScalar(pop)
+    }
+  })
+
   return (
     <group>
       {/* ====== 元の惑星（球体） ====== */}
@@ -342,7 +345,7 @@ export default function Planet({
         receiveShadow
         geometry={geometry}
       >
-        {/* バリアント（既存） */}
+        {/* バリアント */}
         {variant === 'wobble' && (
           <MeshDistortMaterial color={color} distort={0.3} speed={2} roughness={0.4} />
         )}
@@ -381,28 +384,15 @@ export default function Planet({
         castShadow
         receiveShadow
       >
-        <primitive
-          object={cardMat}
-          attach="material"
-          // 球→カードのフェード（tRefで更新）
-          // opacity は useFrame 内で cardMat.opacity = tRef.current によって更新されています
-        />
-        {/* {showCard && (
-          <Html transform center distanceFactor={2.2} style={{ pointerEvents: 'auto' }}>
-            {cardContent}
-          </Html>
-        )} */}
+        <primitive object={cardMat} attach="material" />
       </RoundedBox>
 
-      {/* lowpoly の輪郭線（既存） */}
+      {/* lowpoly の輪郭線 */}
       {variant === 'lowpoly' && <Edges scale={1.001} color="#ffffff" />}
 
-      {/* リング（既存） */}
+      {/* リング（生成物をメモ化） */}
       {ring && (
-        <mesh rotation={[Math.PI / 2.5, 0, 0]} castShadow receiveShadow>
-          <ringGeometry args={[size * 1.2, size * 1.9, 64]} />
-          <meshStandardMaterial color={color} opacity={0.6} transparent side={THREE.DoubleSide} roughness={0.8} />
-        </mesh>
+        <mesh rotation={[Math.PI / 2.5, 0, 0]} castShadow receiveShadow geometry={ringGeom} material={ringMat} />
       )}
     </group>
   )
