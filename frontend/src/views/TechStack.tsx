@@ -9,34 +9,51 @@ const TechStack: React.FC = () => {
 
   return (
     <CardShell title="技術スタック" widthMin={300} widthMax={560}>
+      {/* 言語 */}
       <section style={sec}>
-        <h4 style={h4}><span style={titleName}>Frontend</span></h4>
+        <h4 style={h4}><span style={titleName}>Languages</span></h4>
         <ul style={ul}>
-          <li>TypeScript / JavaScript  / Vite / React / Vue / Qwik / Dart</li>
-          <li>Three.js / @react-three/fiber / drei</li>
-          <li>Tailwind / CSS-in-JS / HTML</li>
+          <li>TypeScript / JavaScript / Dart / Ruby / Python / C++ / SQL</li>
+          <li>HTML / CSS</li>
         </ul>
       </section>
+
+      {/* フレームワーク / ライブラリ */}
       <section style={sec}>
-        <h4 style={h4}><span style={titleName}>Backend</span></h4>
+        <h4 style={h4}><span style={titleName}>Frameworks & Libraries</span></h4>
         <ul style={ul}>
+          <li>React / Vue / Qwik / Vite</li>
           <li>Ruby on Rails / FastAPI</li>
-          <li>PostgreSQL / MySQL / Redis</li>
-          <li>Auth / REST </li>
+          <li>Three.js / @react-three/fiber / drei</li>
+          <li>Tailwind CSS / CSS-in-JS</li>
         </ul>
       </section>
+
+      {/* データベース / インフラ */}
       <section style={sec}>
-        <h4 style={h4}><span style={titleName}>Graphics / ML （基礎）</span></h4>
+        <h4 style={h4}><span style={titleName}>Databases & Infra</span></h4>
+        <ul style={ul}>
+          <li>PostgreSQL / MySQL / Redis</li>
+          <li>Firebase</li>
+          <li>Docker</li>
+        </ul>
+      </section>
+
+      {/* グラフィックス / 機械学習 */}
+      <section style={sec}>
+        <h4 style={h4}><span style={titleName}>Graphics & Machine Learning</span></h4>
         <ul style={ul}>
           <li>GLSL / PBR / PostProcess</li>
           <li>PyTorch / TensorFlow</li>
         </ul>
       </section>
+
+      {/* 開発ツール */}
       <section style={sec}>
-        <h4 style={h4}><span style={titleName}>Another</span></h4>
+        <h4 style={h4}><span style={titleName}>Tools</span></h4>
         <ul style={ul}>
-          <li>Docker / Git / FVM</li>
-          <li>C++ / Firebase</li>
+          <li>Git / GitHub</li>
+          <li>FVM</li>
         </ul>
       </section>
     </CardShell>
